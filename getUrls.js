@@ -16,7 +16,7 @@ const REVIEW_LINK_SELECTOR = ".review > a";
 const getUrls = async () => {
   await initializeUrlFile();
   await extractUrlsFromReviewPages();
-}
+};
 
 const initializeUrlFile = async () => {
   await fsOpen(FILENAME_URI);
@@ -24,13 +24,13 @@ const initializeUrlFile = async () => {
 };
 
 const extractUrlsFromReviewPages = async () => {
-  console.log('starting url extraction')
+  console.log("starting url extraction");
   let thereAreMoreReviews = true;
   let currentPageNum = 1;
 
   while (thereAreMoreReviews) {
     console.log(`On page ${currentPageNum}`);
-    const [ reviewPage, httpStatus ] = await fetchGivenPage(currentPageNum);
+    const [reviewPage, httpStatus] = await fetchGivenPage(currentPageNum);
 
     const urls = extractUrlsFromPage(reviewPage);
     await writeUrlsToFile(urls);
@@ -39,56 +39,60 @@ const extractUrlsFromReviewPages = async () => {
     thereAreMoreReviews = checkForMoreReviews(httpStatus);
     currentPageNum++;
   }
-  console.log('finished url extraction');
+  console.log("finished url extraction");
 };
 
-const fetchGivenPage = async (pageNum) => {
+const fetchGivenPage = async pageNum => {
   const { data: page, status: responseStatusCode } = await httpGetPage(pageNum);
   const parsedPage = convertRawTextToDOM(page);
-  return [ parsedPage, responseStatusCode ];
-}
+  return [parsedPage, responseStatusCode];
+};
 
-const httpGetPage = async (pageNum) => {
+const httpGetPage = async pageNum => {
   let response;
   try {
-    response = await axios.get(`https://pitchfork.com/reviews/albums/?page=${pageNum}`);
+    response = await axios.get(
+      `https://pitchfork.com/reviews/albums/?page=${pageNum}`
+    );
   } catch (err) {
     response = { data: null, status: 404 };
   }
-  return response
+  return response;
 };
 
 const waitTwoSeconds = async () => {
   await new Promise(resolve => {
     setTimeout(() => {
-      resolve()
+      resolve();
     }, 2000);
   });
 };
 
-const convertRawTextToDOM = (rawPage) => {
+const convertRawTextToDOM = rawPage => {
   return new JSDOM(rawPage);
 };
 
-const extractUrlsFromPage = (page) => {
+const extractUrlsFromPage = page => {
   const links = [];
-  const linkSelectors = page.window.document.querySelectorAll(REVIEW_LINK_SELECTOR);
-  for(let linkSelector of linkSelectors) {
+  const linkSelectors = page.window.document.querySelectorAll(
+    REVIEW_LINK_SELECTOR
+  );
+  for (let linkSelector of linkSelectors) {
     links.push(linkSelector.href);
   }
   return links;
 };
 
-const writeUrlsToFile = async (urls) => {
+const writeUrlsToFile = async urls => {
   const urlsToWrite = formatUrlsForWrite(urls);
   await fsAppendFile(FILENAME_URI, urlsToWrite);
 };
 
-const formatUrlsForWrite = (urlsToFormat) => {
+const formatUrlsForWrite = urlsToFormat => {
   return "\n" + urlsToFormat.join("\n");
 };
 
-const checkForMoreReviews = (status) => {
+const checkForMoreReviews = status => {
   return status !== 404;
 };
 
