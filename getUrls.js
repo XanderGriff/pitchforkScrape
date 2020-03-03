@@ -1,11 +1,10 @@
-// const puppeteer = require("puppeteer");
-const fs = require("fs");
-const axios = require("axios");
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
+"use strict";
 
+const axios = require("axios");
+const fs = require("fs");
+const { JSDOM } = require("jsdom");
 const { promisify } = require("util");
-const fsOpen = promisify(fs.open.bind(fs));
+
 const fsWriteFile = promisify(fs.writeFile.bind(fs));
 const fsAppendFile = promisify(fs.appendFile.bind(fs));
 
@@ -15,11 +14,10 @@ const REVIEW_LINK_SELECTOR = ".review > a";
 
 const getUrls = async () => {
   await initializeUrlFile();
-  await extractUrlsFromReviewPages();
+  return extractUrlsFromReviewPages();
 };
 
 const initializeUrlFile = async () => {
-  await fsOpen(FILENAME_URI);
   await fsWriteFile(FILENAME_URI, "Pitchfork URLS");
 };
 
@@ -34,7 +32,7 @@ const extractUrlsFromReviewPages = async () => {
 
     const urls = extractUrlsFromPage(reviewPage);
     await writeUrlsToFile(urls);
-    await waitTwoSeconds();
+    await waitASecond();
 
     thereAreMoreReviews = checkForMoreReviews(httpStatus);
     currentPageNum++;
@@ -60,11 +58,11 @@ const httpGetPage = async pageNum => {
   return response;
 };
 
-const waitTwoSeconds = async () => {
+const waitASecond = async () => {
   await new Promise(resolve => {
     setTimeout(() => {
       resolve();
-    }, 2000);
+    }, 1000);
   });
 };
 
