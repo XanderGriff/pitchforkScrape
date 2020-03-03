@@ -1,2 +1,4 @@
 node_modules/
 pitchfork-urls.txt
+.vscode/
+pitchfork-data.csv
